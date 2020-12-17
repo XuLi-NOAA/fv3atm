@@ -522,7 +522,7 @@ module module_physics_driver
            snohf, dlqfac, ctei_rml, cldf, domr, domzr, domip,           &
            doms, psautco_l, prautco_l, ocalnirbm_cpl, ocalnirdf_cpl,    &
            ocalvisbm_cpl, ocalvisdf_cpl, dtzm, temrain1, t2mmp, q2mp,   &
-           psaur_l, praur_l,                                            &
+           psaur_l, praur_l,z_c_0,                                      &
 !--- for CS-convection
            wcbmax
 
@@ -1734,11 +1734,12 @@ module module_physics_driver
             endif
           enddo
           if (Model%cplflx) then       ! apply only at ocean points
+            z_c_0 = 0.0
             call get_dtzm_2d (Sfcprop%xt,  Sfcprop%xz, Sfcprop%dt_cool,  &
-                              Sfcprop%z_c, wet, zero, omz1, im, 1, dtzm)
+                              z_c_0, wet, zero, omz1, im, 1, dtzm)
             do i=1,im
               if (wet(i) .and. Sfcprop%oceanfrac(i) > zero) then
-                Sfcprop%tref(i) = Sfcprop%tsfco(i) - dtzm(i)    ! update Tf with T1 and NSST T-Profile
+                Sfcprop%tref(i) = max(tgice, Sfcprop%tsfco(i) - dtzm(i) )   ! update Tf with T1 and NSST T-Profile
                 if (abs(Sfcprop%xz(i)) > zero) then
                   tem2 = one / Sfcprop%xz(i)
                 else
